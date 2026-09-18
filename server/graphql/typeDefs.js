@@ -62,7 +62,7 @@ const typeDefs = `#graphql
 
     deleteWeight(
       id: ID!
-    ): Weight!
+    ): Boolean!
 
     saveGoalWeight(
       goal_weight: Float!

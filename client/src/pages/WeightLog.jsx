@@ -41,7 +41,10 @@ function WeightLog() {
     error: weightError,
     refetch: refetchWeights,
   } = useQuery(
-    GET_WEIGHTS_FOR_USER
+    GET_WEIGHTS_FOR_USER,
+    {
+        fetchPolicy: "network-only",
+    }
   );
 
   const {

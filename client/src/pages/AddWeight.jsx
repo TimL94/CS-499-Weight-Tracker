@@ -202,7 +202,6 @@ function AddWeight() {
           >
             <TextField
               id="editTextDate"
-              label="Date"
               type="date"
               value={
                 editTextDate
