@@ -2,6 +2,7 @@ import React from "react";
 
 import ReactDOM from "react-dom/client";
 
+// Imports Apollo Client and related modules for GraphQL API communication.
 import {
   ApolloClient,
   HttpLink,
@@ -27,6 +28,7 @@ import {
   RouterProvider,
 } from "react-router-dom";
 
+// Imports the main application component and all page components.
 import App from "./App.jsx";
 
 import ProtectedRoute from "./components/ProtectedRoute.jsx";
@@ -41,6 +43,8 @@ import CalorieLog from "./pages/CalorieLog.jsx";
 import Auth from "./utils/auth.js";
 import theme from "./utils/theme.js";
 
+
+// Connects Apollo Client to the GraphQL API.
 const httpLink =
   new HttpLink({
     uri:
@@ -49,6 +53,7 @@ const httpLink =
       "http://localhost:4000/graphql",
   });
 
+// Adds the authentication token to the request headers for authenticated API requests.
 const authLink =
   new SetContextLink(
     (prevContext) => {
@@ -70,6 +75,7 @@ const authLink =
     }
   );
 
+// Creates the Apollo Client instance with the HTTP link and authentication link.
 const client =
   new ApolloClient({
     link:
@@ -81,6 +87,7 @@ const client =
       new InMemoryCache(),
   });
 
+// Redirects the user to the appropriate page based on their authentication status.
 function HomeRedirect() {
   if (
     Auth.loggedIn()
@@ -101,6 +108,8 @@ function HomeRedirect() {
   );
 }
 
+
+// Creates the router for the application, defining the routes and their corresponding components.
 const router =
   createBrowserRouter([
     {
@@ -187,6 +196,7 @@ const router =
     },
   ]);
 
+  // Renders the application, wrapping it with ApolloProvider for GraphQL support and ThemeProvider for Material-UI theming.
 ReactDOM
   .createRoot(
     document.getElementById(

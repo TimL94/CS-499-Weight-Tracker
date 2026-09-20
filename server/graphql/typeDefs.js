@@ -1,3 +1,4 @@
+// GraphQL type definitions for the Weight Tracker application, defining the schema for users, weights, goals, and calorie entries.
 const typeDefs = `#graphql
 
   type User {

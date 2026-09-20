@@ -32,22 +32,26 @@ import {
   GET_CALORIE_ENTRIES_FOR_USER,
 } from "../utils/queries.js";
 
+// Provides a form for users to add calorie entries and displays a table of existing entries.
 function CalorieLog() {
   const [
     editTextDate,
     setEditTextDate,
   ] = useState("");
 
+  // State variable for managing the calories input field.
   const [
     editTextCalories,
     setEditTextCalories,
   ] = useState("");
 
+  // State variable for managing error messages related to form submission.
   const [
     errorMessage,
     setErrorMessage,
   ] = useState("");
 
+  // Fetches the user's calorie entries from the GraphQL API and manages loading and error states.
   const {
     data,
     loading,
@@ -56,12 +60,14 @@ function CalorieLog() {
     GET_CALORIE_ENTRIES_FOR_USER
   );
 
+  // GraphQL mutation for adding a new calorie entry.
   const [
     addCalorieEntry,
   ] = useMutation(
     ADD_CALORIE_ENTRY
   );
 
+  // Handles the form submission for adding a new calorie entry, including validation and error handling.
   const buttonSaveCalories =
     async (event) => {
       event.preventDefault();
@@ -92,6 +98,7 @@ function CalorieLog() {
           );
         }
 
+        // Performs the GraphQL mutation to add a new calorie entry and refetches the user's entries to update the table.
         await addCalorieEntry({
           variables: {
             date:
@@ -120,6 +127,7 @@ function CalorieLog() {
       }
     };
 
+  // Renders the CalorieLog component, including the form for adding entries and the table displaying existing entries.
   return (
     <Container
       maxWidth="lg"

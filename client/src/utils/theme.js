@@ -1,5 +1,6 @@
 import { createTheme } from "@mui/material/styles";
 
+// Defines a custom Material-UI theme for the application.
 const theme = createTheme({
   palette: {
     primary: {

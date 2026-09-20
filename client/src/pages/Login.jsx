@@ -25,27 +25,33 @@ import {
 
 import Auth from "../utils/auth.js";
 
+// Provides a form for users to log in and handles the login process.
 function Login() {
   const navigate = useNavigate();
 
+  // State variables for managing the form inputs and error messages.
   const [
     editTextUsername,
     setEditTextUsername,
   ] = useState("");
 
+  // State variables for managing the form inputs and error messages.
   const [
     editTextPassword,
     setEditTextPassword,
   ] = useState("");
 
+  // State variable for managing error messages related to form submission.
   const [
     errorMessage,
     setErrorMessage,
   ] = useState("");
 
+  // GraphQL mutation for logging in a user.
   const [loginUser] =
     useMutation(LOGIN_USER);
 
+    // Handles the form submission for logging in a user, including validation and error handling.
   const buttonLogin =
     async (event) => {
       event.preventDefault();
@@ -74,6 +80,7 @@ function Login() {
       }
     };
 
+  // Renders the Login component, including the form for logging in and any error messages.
   return (
     <Box
       sx={{

@@ -22,9 +22,10 @@ const server = new ApolloServer({
   resolvers,
 });
 
-// starts the server
+// starts the Apollo server and prepares it to handle incoming requests.
 await server.start();
 
+// adds middleware to the express server to handle GraphQL requests, including CORS and JSON parsing, and sets up the authentication context for each request.
 app.use(
   "/graphql",
   cors(),
@@ -38,7 +39,7 @@ app.use(
 
 const PORT = process.env.PORT || 4000;
 
-// sets the port to either PORT or port 4000
+// starts the express server and listens on the specified port, logging a message to the console when the server is running.
 app.listen(PORT, () => {
   console.log(
     `Weight Tracker server running on port ${PORT}`

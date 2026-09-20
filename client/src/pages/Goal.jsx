@@ -31,20 +31,24 @@ import {
   SAVE_GOAL_WEIGHT,
 } from "../utils/mutations.js";
 
+// Provides a form for users to set their goal weight and handles the goal weight saving process.
 function Goal() {
   const navigate =
     useNavigate();
 
+  // State variable for managing the goal weight input field.
   const [
     goal_weight,
     setGoalWeight,
   ] = useState("");
 
+  // State variable for managing error messages related to form submission.
   const [
     errorMessage,
     setErrorMessage,
   ] = useState("");
 
+  // Fetches the user's goal weight from the GraphQL API and manages loading and error states.
   const {
     data,
     loading,
@@ -53,11 +57,13 @@ function Goal() {
     GET_GOAL_WEIGHT
   );
 
+  // GraphQL mutation for saving the user's goal weight.
   const [saveGoalWeight] =
     useMutation(
       SAVE_GOAL_WEIGHT
     );
 
+    // Updates the goal weight state when the data from the GraphQL query changes.
   useEffect(() => {
     if (
       data?.getGoalWeight
@@ -69,6 +75,7 @@ function Goal() {
     }
   }, [data]);
 
+  // Handles the form submission for setting the user's goal weight, including validation and error handling.
   const buttonSetGoal =
     async (event) => {
       event.preventDefault();
@@ -112,6 +119,7 @@ function Goal() {
       }
     };
 
+  // Handles the cancel button click event, navigating the user back to the weight log page without saving any changes.
   const buttonCancelGoal =
     () => {
       navigate(
@@ -119,6 +127,7 @@ function Goal() {
       );
     };
 
+  // Renders the Goal component, including the form for setting the goal weight and any error messages.
   return (
     <Container
       maxWidth="sm"

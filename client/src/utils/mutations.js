@@ -1,5 +1,6 @@
 import { gql } from "@apollo/client";
 
+// GraphQL mutations for user authentication, weight management, and goal weight management.
 export const CREATE_USER = gql`
   mutation CreateUser(
     $username: String!
@@ -16,6 +17,7 @@ export const CREATE_USER = gql`
   }
 `;
 
+// GraphQL mutation for logging in a user.
 export const LOGIN_USER = gql`
   mutation LoginUser(
     $username: String!
@@ -32,6 +34,7 @@ export const LOGIN_USER = gql`
   }
 `;
 
+// GraphQL mutation for deleting a weight entry.
 export const ADD_WEIGHT = gql`
   mutation AddWeight(
     $date: String!
@@ -49,6 +52,7 @@ export const ADD_WEIGHT = gql`
   }
 `;
 
+//
 export const UPDATE_WEIGHT = gql`
   mutation UpdateWeight(
     $id: ID!
@@ -68,12 +72,14 @@ export const UPDATE_WEIGHT = gql`
   }
 `;
 
+//
 export const DELETE_WEIGHT = gql`
   mutation DeleteWeight($id: ID!) {
     deleteWeight(id: $id)
   }
 `;
 
+//
 export const SAVE_GOAL_WEIGHT = gql`
   mutation SaveGoalWeight(
     $goal_weight: Float!
@@ -88,6 +94,7 @@ export const SAVE_GOAL_WEIGHT = gql`
   }
 `;
 
+//
 export const ADD_CALORIE_ENTRY = gql`
   mutation AddCalorieEntry(
     $date: String!

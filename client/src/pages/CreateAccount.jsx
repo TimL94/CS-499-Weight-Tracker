@@ -25,27 +25,33 @@ import {
 
 import Auth from "../utils/auth.js";
 
+// Provides a form for users to create a new account and handles the account creation process.
 function CreateAccount() {
   const navigate = useNavigate();
 
+  // State variables for managing the form inputs and error messages.
   const [
     editTextUsername,
     setEditTextUsername,
   ] = useState("");
 
+  // State variables for managing the form inputs and error messages.
   const [
     editTextPassword,
     setEditTextPassword,
   ] = useState("");
 
+  // State variable for managing error messages related to form submission.
   const [
     errorMessage,
     setErrorMessage,
   ] = useState("");
 
+  // GraphQL mutation for creating a new user account.
   const [createUser] =
     useMutation(CREATE_USER);
 
+  // Handles the form submission for creating a new user account, including validation and error handling.
   const buttonCreateAccount =
     async (event) => {
       event.preventDefault();
@@ -76,6 +82,7 @@ function CreateAccount() {
       }
     };
 
+  // Renders the CreateAccount component, including the form for creating a new account and any error messages.
   return (
     <Box
       sx={{

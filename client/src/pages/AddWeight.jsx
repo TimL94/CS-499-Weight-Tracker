@@ -31,6 +31,7 @@ import {
   GET_WEIGHTS_FOR_USER,
 } from "../utils/queries.js";
 
+// Provides a form for users to add or edit their weight entries.
 function AddWeight() {
   const location =
     useLocation();
@@ -38,6 +39,7 @@ function AddWeight() {
   const navigate =
     useNavigate();
 
+  // State variables for managing the form inputs and error messages.
   const [
     editingWeightId,
     setEditingWeightId,
@@ -47,6 +49,7 @@ function AddWeight() {
       null
   );
 
+  // State variables for managing the form inputs and error messages.
   const [
     editTextDate,
     setEditTextDate,
@@ -56,6 +59,7 @@ function AddWeight() {
       ""
   );
 
+  // State variables for managing the form inputs and error messages.
   const [
     editTextWeight,
     setEditTextWeight,
@@ -65,27 +69,33 @@ function AddWeight() {
       ""
   );
 
+  // State variable for managing error messages.
   const [
     errorMessage,
     setErrorMessage,
   ] = useState("");
 
+  // GraphQL mutations for adding and updating weight entries.
   const [addWeight] =
     useMutation(
       ADD_WEIGHT
     );
 
+  // GraphQL mutations for adding and updating weight entries.
   const [updateWeight] =
     useMutation(
       UPDATE_WEIGHT
     );
 
+  // Handles the form submission for adding or updating a weight entry.
   const buttonSaveWeight =
     async (event) => {
       event.preventDefault();
 
       setErrorMessage("");
 
+     /* Validates the form inputs and performs the appropriate GraphQL mutation 
+        based on whether the user is adding a new weight entry or editing an existing one.*/
       try {
         const weight =
           Number(
@@ -158,6 +168,7 @@ function AddWeight() {
       }
     };
 
+  // Handles the cancel action, navigating the user back to the weight log page without saving changes.
   const buttonCancelAddWeight =
     () => {
       navigate(
@@ -165,6 +176,8 @@ function AddWeight() {
       );
     };
 
+  // Renders the form for adding or editing a weight entry, including input fields for date and weight, 
+  // and buttons for saving or canceling the action.
   return (
     <Container
       maxWidth="sm"
@@ -187,7 +200,7 @@ function AddWeight() {
               ? "Edit Weight"
               : "Add Weight"}
           </Typography>
-
+          
           <Box
             component="form"
             onSubmit={

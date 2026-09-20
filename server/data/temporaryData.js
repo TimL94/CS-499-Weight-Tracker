@@ -3,6 +3,7 @@ export const weights = [];
 export const goals = [];
 export const calorieEntries = [];
 
+// Functions to generate unique/temporary IDs for users, weights, goals, and calorie entries.
 let nextUserId = 1;
 let nextWeightId = 1;
 let nextGoalId = 1;

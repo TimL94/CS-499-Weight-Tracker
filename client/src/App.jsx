@@ -5,6 +5,7 @@ import { Box } from "@mui/material";
 import Navbar from "./components/Navbar.jsx";
 import Footer from "./components/Footer.jsx";
 
+// Builds the shared layout for all application pages.
 function App() {
   return (
     <Box

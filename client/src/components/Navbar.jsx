@@ -13,14 +13,17 @@ import {
 
 import Auth from "../utils/auth.js";
 
+// Displays navigation links for logged-in users.
 function Navbar() {
   const navigate = useNavigate();
 
+  // Logs the user out and returns to the login page.
   const buttonLogout = () => {
     Auth.logout();
     navigate("/login");
   };
 
+  // Displays the navigation bar with links to different pages based on the user's authentication status.
   return (
     <AppBar position="static">
       <Toolbar>

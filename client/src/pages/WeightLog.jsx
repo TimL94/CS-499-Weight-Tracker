@@ -32,9 +32,13 @@ import {
   DELETE_WEIGHT,
 } from "../utils/mutations.js";
 
+// Provides a view for users to see their weight log, including their goal weight and a table of weight entries.
 function WeightLog() {
+
+  // Navigation hook for programmatic navigation between routes.
   const navigate = useNavigate();
 
+  // Fetches the user's weight entries from the GraphQL API and manages loading and error states.
   const {
     data: weightData,
     loading: weightLoading,
@@ -47,6 +51,7 @@ function WeightLog() {
     }
   );
 
+  // Fetches the user's goal weight from the GraphQL API and manages loading and error states.
   const {
     data: goalData,
     loading: goalLoading,
@@ -55,6 +60,7 @@ function WeightLog() {
     GET_GOAL_WEIGHT
   );
 
+  // GraphQL mutation for deleting a weight entry.
   const [
     deleteWeight,
     {
@@ -64,14 +70,17 @@ function WeightLog() {
     DELETE_WEIGHT
   );
 
+  // Handles the navigation to the AddWeight page when the "Add Weight" button is clicked.
   const buttonAddWeight = () => {
     navigate("/add-weight");
   };
 
+  // Handles the navigation to the Goal page when the "Set Goal" button is clicked.
   const buttonSetGoal = () => {
     navigate("/goal");
   };
 
+  // Handles the navigation to the AddWeight page with pre-filled data for editing a weight entry.
   const editWeight = (
     weightEntry
   ) => {
@@ -92,6 +101,7 @@ function WeightLog() {
     );
   };
 
+  // Handles the deletion of a weight entry and refetches the weight entries to update the table.
   const removeWeight =
     async (
       editingWeightId
@@ -112,6 +122,7 @@ function WeightLog() {
       }
     };
 
+  // Renders the WeightLog component, including the goal weight display, add weight button, and the table of weight entries.
   return (
     <Container
       maxWidth="lg"

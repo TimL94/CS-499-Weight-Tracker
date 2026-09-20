@@ -3,6 +3,7 @@ import {
   Typography,
 } from "@mui/material";
 
+// Displays the shared application footer.
 function Footer() {
   return (
     <Box
