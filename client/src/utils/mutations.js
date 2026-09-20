@@ -34,7 +34,7 @@ export const LOGIN_USER = gql`
   }
 `;
 
-// GraphQL mutation for deleting a weight entry.
+// GraphQL mutation for adding a weight entry.
 export const ADD_WEIGHT = gql`
   mutation AddWeight(
     $date: String!
@@ -52,7 +52,7 @@ export const ADD_WEIGHT = gql`
   }
 `;
 
-//
+// GraphQL mutation for updating a weight entry.
 export const UPDATE_WEIGHT = gql`
   mutation UpdateWeight(
     $id: ID!
@@ -72,14 +72,14 @@ export const UPDATE_WEIGHT = gql`
   }
 `;
 
-//
+// GraphQL mutation for deleting a weight entry.
 export const DELETE_WEIGHT = gql`
   mutation DeleteWeight($id: ID!) {
     deleteWeight(id: $id)
   }
 `;
 
-//
+// GraphQL mutation for saving the user's goal weight.
 export const SAVE_GOAL_WEIGHT = gql`
   mutation SaveGoalWeight(
     $goal_weight: Float!
@@ -94,7 +94,7 @@ export const SAVE_GOAL_WEIGHT = gql`
   }
 `;
 
-//
+// GraphQL mutation for adding a calorie entry.
 export const ADD_CALORIE_ENTRY = gql`
   mutation AddCalorieEntry(
     $date: String!

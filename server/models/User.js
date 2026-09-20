@@ -1,1 +1,1 @@
-//FIXME: Will work on in later milestones.
+// User model will be implemented during the database enhancement.
