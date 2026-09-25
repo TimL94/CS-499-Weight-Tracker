@@ -22,7 +22,10 @@ function CalorieCalculator() {
   const [gender, setGender] =
     useState("");
 
-  const [editTextHeight, setEditTextHeight] =
+  const [editTextFeet, setEditTextFeet] =
+    useState("");
+
+  const [editTextInches, setEditTextInches] =
     useState("");
 
   const [editTextWeight, setEditTextWeight] =
@@ -47,7 +50,8 @@ function CalorieCalculator() {
       if (
         editTextAge.trim() === "" ||
         gender === "" ||
-        editTextHeight.trim() === "" ||
+        editTextFeet.trim() === "" ||
+        editTextInches.trim() === "" ||
         editTextWeight.trim() === ""
       ) {
         throw new Error(
@@ -55,10 +59,34 @@ function CalorieCalculator() {
         );
       }
 
+      const feet = Number(editTextFeet);
+      const inches = Number(editTextInches);
+
+      if (
+        !Number.isInteger(feet) ||
+        feet < 0
+      ) {
+        throw new Error(
+          "Feet must be a whole number of zero or greater."
+        );
+      }
+
+      if (
+        !Number.isFinite(inches) ||
+        inches < 0 ||
+        inches >= 12
+      ) {
+        throw new Error(
+          "Inches must be zero or greater and less than 12."
+        );
+      }
+
+      const height = feet * 12 + inches;
+
       const result = calculateCalories({
         age: Number(editTextAge),
         gender,
-        height: Number(editTextHeight),
+        height,
         weight: Number(editTextWeight),
       });
 
@@ -85,7 +113,7 @@ function CalorieCalculator() {
           sx={{ mb: 3 }}
         >
           Estimate maintenance calories using a sedentary
-          activity assumption. Enter height in total inches
+          activity assumption. Enter height in feet and inches
           and weight in pounds.
         </Typography>
 
@@ -120,21 +148,21 @@ function CalorieCalculator() {
                   step: 1,
                 },
               }}
-              helperText="Whole years, ages 18–120"
+              helperText="Enter an age from 18-120"
               fullWidth
               required
             />
 
             <TextField
               id="gender"
-              label="Sex used by equation"
+              label="Select Sex"
               select
               value={gender}
               onChange={(event) => {
                 setGender(event.target.value);
                 clearCalculation();
               }}
-              helperText="Select the equation coefficient"
+              helperText="Sex is used to determine the equation adjustment"
               fullWidth
               required
             >
@@ -147,25 +175,53 @@ function CalorieCalculator() {
               </MenuItem>
             </TextField>
 
-            <TextField
-              id="editTextHeight"
-              label="Height (inches)"
-              type="number"
-              value={editTextHeight}
-              onChange={(event) => {
-                setEditTextHeight(event.target.value);
-                clearCalculation();
+            <Box
+              sx={{
+                display: "grid",
+                gridTemplateColumns: "1fr 1fr",
+                gap: 2,
               }}
-              slotProps={{
-                htmlInput: {
-                  min: 0,
-                  step: "any",
-                },
-              }}
-              helperText="Example: 5 feet 10 inches = 70"
-              fullWidth
-              required
-            />
+            >
+              <TextField
+                id="editTextFeet"
+                label="Height (feet)"
+                type="number"
+                value={editTextFeet}
+                onChange={(event) => {
+                  setEditTextFeet(event.target.value);
+                  clearCalculation();
+                }}
+                slotProps={{
+                  htmlInput: {
+                    min: 0,
+                    step: 1,
+                  },
+                }}
+                helperText="Whole feet"
+                fullWidth
+                required
+              />
+
+              <TextField
+                id="editTextInches"
+                label="Height (inches)"
+                type="number"
+                value={editTextInches}
+                onChange={(event) => {
+                  setEditTextInches(event.target.value);
+                  clearCalculation();
+                }}
+                slotProps={{
+                  htmlInput: {
+                    min: 0,
+                    step: "any",
+                  },
+                }}
+                helperText="Value from 0-11"
+                fullWidth
+                required
+              />
+            </Box>
 
             <TextField
               id="calculatorEditTextWeight"
@@ -251,7 +307,7 @@ function CalorieCalculator() {
               Uses a sedentary activity multiplier of{" "}
               {calorieCalculation.activityMultiplier}.
               Actual needs vary with activity and individual
-              circumstances. No weight-loss deficit is included.
+              circumstances. This estimate is not a substitute for professional medical advice.
             </Typography>
           </Box>
         )}
