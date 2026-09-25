@@ -32,6 +32,8 @@ import {
   GET_CALORIE_ENTRIES_FOR_USER,
 } from "../utils/queries.js";
 
+import CalorieCalculator from "../components/CalorieCalculator.jsx";
+
 // Provides a form for users to add calorie entries and displays a table of existing entries.
 function CalorieLog() {
   const [
@@ -145,6 +147,7 @@ function CalorieLog() {
       >
         Calorie Log
       </Typography>
+      <CalorieCalculator />
 
       <Card
         sx={{
