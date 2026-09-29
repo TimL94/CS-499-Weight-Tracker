@@ -8,6 +8,7 @@ import { expressMiddleware } from "@as-integrations/express5";
 
 import typeDefs from "./graphql/typeDefs.js";
 import resolvers from "./graphql/resolvers.js";
+import connectDB from "./config/db.js";
 
 // used for authenticating users using JWT token
 import {
@@ -21,6 +22,9 @@ const server = new ApolloServer({
   typeDefs,
   resolvers,
 });
+
+// Connects to MongoDB before starting the API.
+await connectDB();
 
 // starts the Apollo server and prepares it to handle incoming requests.
 await server.start();
