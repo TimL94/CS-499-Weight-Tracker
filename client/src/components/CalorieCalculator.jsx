@@ -15,6 +15,7 @@ import {
   calculateCalories,
 } from "../utils/calorieCalculator.js";
 
+// Provides a form for users to calculate their estimated maintenance calories based on age, gender, height, and weight.
 function CalorieCalculator() {
   const [editTextAge, setEditTextAge] =
     useState("");
@@ -42,6 +43,7 @@ function CalorieCalculator() {
     setErrorMessage("");
   };
 
+  // Handle the form submission to calculate calories based on user input.
   const buttonCalculateCalories = (event) => {
     event.preventDefault();
     clearCalculation();
@@ -96,6 +98,7 @@ function CalorieCalculator() {
     }
   };
 
+  // Renders the calorie calculator form and displays the results or any error messages.
   return (
     <Card sx={{ mb: 3 }}>
       <CardContent>

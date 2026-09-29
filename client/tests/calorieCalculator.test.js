@@ -12,6 +12,7 @@ const validInput = {
   weight: 180,
 };
 
+// Test cases for the calculateCalories function, covering various scenarios including valid inputs, edge cases, and error handling.
 test("calculates the expected male result", () => {
   assert.deepEqual(
     calculateCalories(validInput),
@@ -23,6 +24,7 @@ test("calculates the expected male result", () => {
   );
 });
 
+// Test cases for the calculateCalories function, covering various scenarios including valid inputs, edge cases, and error handling.
 test("calculates the expected female result", () => {
   assert.deepEqual(
     calculateCalories({
@@ -37,6 +39,7 @@ test("calculates the expected female result", () => {
   );
 });
 
+// Test cases for the calculateCalories function, covering various scenarios including valid inputs, edge cases, and error handling.
 test("accepts ages 18 and 120", () => {
   for (const age of [18, 120]) {
     const result = calculateCalories({
@@ -52,6 +55,7 @@ test("accepts ages 18 and 120", () => {
   }
 });
 
+// Test cases for the calculateCalories function, covering various scenarios including valid inputs, edge cases, and error handling.
 test("rejects invalid ages", () => {
   for (const age of [
     undefined,
@@ -74,6 +78,7 @@ test("rejects invalid ages", () => {
   }
 });
 
+// Test cases for the calculateCalories function, covering various scenarios including valid inputs, edge cases, and error handling.
 test("rejects invalid equation selections", () => {
   for (const gender of [
     undefined,
@@ -90,6 +95,7 @@ test("rejects invalid equation selections", () => {
   }
 });
 
+// Test cases for the calculateCalories function, covering various scenarios including valid inputs, edge cases, and error handling.
 test("rejects invalid height and weight", () => {
   for (const field of ["height", "weight"]) {
     for (const value of [
@@ -112,6 +118,7 @@ test("rejects invalid height and weight", () => {
   }
 });
 
+// Test cases for the calculateCalories function, covering various scenarios including valid inputs, edge cases, and error handling.
 test("rejects nonpositive calorie estimates", () => {
   assert.throws(
     () => calculateCalories({
@@ -124,6 +131,7 @@ test("rejects nonpositive calorie estimates", () => {
   );
 });
 
+// Test cases for the calculateCalories function, covering various scenarios including valid inputs, edge cases, and error handling.
 test("does not change the input object", () => {
   const input = Object.freeze({
     ...validInput,
