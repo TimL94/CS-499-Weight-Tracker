@@ -1,0 +1,1 @@
+// Goal model will be implemented during the database enhancement.
