@@ -1,75 +1,80 @@
 import bcrypt from "bcryptjs";
+import mongoose from "mongoose";
 
-import {
-  users,
-  weights,
-  goals,
-  calorieEntries,
-  getNextUserId,
-  getNextWeightId,
-  getNextGoalId,
-  getNextCalorieEntryId,
-} from "../data/temporaryData.js";
+import User from "../models/User.js";
+import WeightEntry from "../models/WeightEntry.js";
+import Goal from "../models/Goal.js";
+import CalorieEntry from "../models/CalorieEntry.js";
 
 import { signToken } from "../utils/auth.js";
 
-// Helper function to ensure that a user is logged in before performing certain actions.
+// Requires an authenticated user with a MongoDB ID.
 const requireUser = (context) => {
-  if (!context.loggedIn || !context.currentUserId) {
+  if (
+    !context.loggedIn ||
+    !mongoose.isObjectIdOrHexString(context.currentUserId)
+  ) {
     throw new Error("You must be logged in.");
   }
 
-  return Number(context.currentUserId);
+  return String(context.currentUserId);
 };
 
-// GraphQL resolvers for handling queries and mutations related to users, weights, goals, and calorie entries.
+// Validates a real calendar date in YYYY-MM-DD format.
+const validateDate = (date) => {
+  if (!date) {
+    throw new Error("Date is required.");
+  }
+
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+    throw new Error("Date must use YYYY-MM-DD.");
+  }
+
+  const parsedDate = new Date(`${date}T00:00:00.000Z`);
+
+  if (
+    Number.isNaN(parsedDate.getTime()) ||
+    parsedDate.toISOString().slice(0, 10) !== date
+  ) {
+    throw new Error("Enter a valid date.");
+  }
+};
+
 const resolvers = {
   Query: {
-    // Simple health check query to verify that the API is running.
     health: () => {
       return "Weight Tracker API is running";
     },
 
-    // Fetches the weights for the currently logged-in user, ensuring that the user is authenticated.
-    getWeightsForUser: (_, args, context) => {
+    getWeightsForUser: async (_, args, context) => {
       const currentUserId = requireUser(context);
 
-      return weights.filter(
-        (weightEntry) =>
-          weightEntry.user_id === currentUserId
-      );
+      return WeightEntry.find({
+        user_id: currentUserId,
+      });
     },
 
-    // Fetches the goal weight for the currently logged-in user, ensuring that the user is authenticated.
-    getGoalWeight: (_, args, context) => {
+    getGoalWeight: async (_, args, context) => {
       const currentUserId = requireUser(context);
 
-      return (
-        goals.find(
-          (goal) =>
-            goal.user_id === currentUserId
-        ) || null
-      );
+      return Goal.findOne({
+        user_id: currentUserId,
+      });
     },
 
-    // Fetches the calorie entries for the currently logged-in user, ensuring that the user is authenticated.
-    getCalorieEntriesForUser: (_, args, context) => {
+    getCalorieEntriesForUser: async (_, args, context) => {
       const currentUserId = requireUser(context);
 
-      return calorieEntries.filter(
-        (calorieEntry) =>
-          calorieEntry.user_id === currentUserId
-      );
+      return CalorieEntry.find({
+        user_id: currentUserId,
+      });
     },
   },
 
-
-  // GraphQL mutations for creating users, logging in, and managing weights, goals, and calorie entries.
   Mutation: {
-
-    // Creates a new user with a unique username and securely hashed password, returning an authentication token upon success.
+    // Hashes passwords before saving user accounts.
     createUser: async (_, { username, password }) => {
-      const trimmedUsername = username.trim();
+      const trimmedUsername = username.trim().toLowerCase();
 
       if (!trimmedUsername || !password) {
         throw new Error(
@@ -77,31 +82,33 @@ const resolvers = {
         );
       }
 
-      const existingUser = users.find(
-        (user) =>
-          user.username.toLowerCase() ===
-          trimmedUsername.toLowerCase()
-      );
+      // Waits for the unique username index to be ready.
+      await User.init();
+
+      const existingUser = await User.findOne({
+        username: trimmedUsername,
+      });
 
       if (existingUser) {
-        throw new Error(
-          "That username already exists."
-        );
+        throw new Error("That username already exists.");
       }
 
-      const hashedPassword =
-        await bcrypt.hash(password, 10);
+      const hashedPassword = await bcrypt.hash(password, 10);
 
-      const user = {
-        id: getNextUserId(),
-        username: trimmedUsername,
+      let user;
 
-        // Same password concept as Android,
-        // but the value is now securely hashed.
-        password: hashedPassword,
-      };
+      try {
+        user = await User.create({
+          username: trimmedUsername,
+          password: hashedPassword,
+        });
+      } catch (error) {
+        if (error.code === 11000) {
+          throw new Error("That username already exists.");
+        }
 
-      users.push(user);
+        throw error;
+      }
 
       const token = signToken(user.id);
 
@@ -112,30 +119,22 @@ const resolvers = {
       };
     },
 
-    // Logs in an existing user by verifying the provided username and password, returning an authentication token upon success.
     loginUser: async (_, { username, password }) => {
-      const user = users.find(
-        (user) =>
-          user.username.toLowerCase() ===
-          username.trim().toLowerCase()
-      );
+      const user = await User.findOne({
+        username: username.trim().toLowerCase(),
+      });
 
       if (!user) {
-        throw new Error(
-          "Incorrect username or password."
-        );
+        throw new Error("Incorrect username or password.");
       }
 
-      const correctPassword =
-        await bcrypt.compare(
-          password,
-          user.password
-        );
+      const correctPassword = await bcrypt.compare(
+        password,
+        user.password
+      );
 
       if (!correctPassword) {
-        throw new Error(
-          "Incorrect username or password."
-        );
+        throw new Error("Incorrect username or password.");
       }
 
       const token = signToken(user.id);
@@ -147,95 +146,82 @@ const resolvers = {
       };
     },
 
-    // Adds a new weight entry for the currently logged-in user, ensuring that the user is authenticated.
-    addWeight: (_, { date, weight }, context) => {
+    addWeight: async (_, { date, weight }, context) => {
       const currentUserId = requireUser(context);
 
-      if (!date) {
-        throw new Error("Date is required.");
-      }
+      validateDate(date);
 
       if (weight <= 0) {
-        throw new Error(
-          "Weight must be greater than zero."
-        );
+        throw new Error("Weight must be greater than zero.");
       }
 
-      const weightEntry = {
-        id: getNextWeightId(),
+      return WeightEntry.create({
         user_id: currentUserId,
         date,
         weight,
-      };
-
-      weights.push(weightEntry);
-
-      return weightEntry;
+      });
     },
 
-    // Updates an existing weight entry for the currently logged-in user, ensuring that the user is authenticated and that the entry exists.
-    updateWeight: (
+    // Includes ownership in the database filter.
+    updateWeight: async (
       _,
       { id, date, weight },
       context
     ) => {
       const currentUserId = requireUser(context);
 
-      const editingWeightId = Number(id);
+      if (!mongoose.isObjectIdOrHexString(id)) {
+        throw new Error("Weight entry was not found.");
+      }
 
-      const weightEntry = weights.find(
-        (weightEntry) =>
-          weightEntry.id === editingWeightId &&
-          weightEntry.user_id === currentUserId
+      validateDate(date);
+
+      if (weight <= 0) {
+        throw new Error("Weight must be greater than zero.");
+      }
+
+      const weightEntry = await WeightEntry.findOneAndUpdate(
+        {
+          _id: id,
+          user_id: currentUserId,
+        },
+        {
+          $set: { date, weight },
+        },
+        {
+          new: true,
+          runValidators: true,
+        }
       );
 
       if (!weightEntry) {
-        throw new Error(
-          "Weight entry was not found."
-        );
+        throw new Error("Weight entry was not found.");
       }
-
-      if (!date) {
-        throw new Error("Date is required.");
-      }
-
-      if (weight <= 0) {
-        throw new Error(
-          "Weight must be greater than zero."
-        );
-      }
-
-      weightEntry.date = date;
-      weightEntry.weight = weight;
 
       return weightEntry;
     },
 
-    // Deletes an existing weight entry for the currently logged-in user, ensuring that the user is authenticated and that the entry exists.
-    deleteWeight: (_, { id }, context) => {
+    deleteWeight: async (_, { id }, context) => {
       const currentUserId = requireUser(context);
 
-      const editingWeightId = Number(id);
-
-      const weightIndex = weights.findIndex(
-        (weightEntry) =>
-          weightEntry.id === editingWeightId &&
-          weightEntry.user_id === currentUserId
-      );
-
-      if (weightIndex === -1) {
-        throw new Error(
-          "Weight entry was not found."
-        );
+      if (!mongoose.isObjectIdOrHexString(id)) {
+        throw new Error("Weight entry was not found.");
       }
 
-      weights.splice(weightIndex, 1);
+      const weightEntry = await WeightEntry.findOneAndDelete({
+        _id: id,
+        user_id: currentUserId,
+      });
+
+      if (!weightEntry) {
+        throw new Error("Weight entry was not found.");
+      }
 
       return true;
     },
 
-    // Saves the goal weight for the currently logged-in user, ensuring that the user is authenticated.
-    saveGoalWeight: (
+    // Updates the user's goal or creates their first goal.
+    saveGoalWeight: async (
       _,
       { goal_weight },
       context
@@ -248,55 +234,41 @@ const resolvers = {
         );
       }
 
-      let goal = goals.find(
-        (goal) =>
-          goal.user_id === currentUserId
+      await Goal.init();
+
+      return Goal.findOneAndUpdate(
+        {
+          user_id: currentUserId,
+        },
+        {
+          $set: { goal_weight },
+        },
+        {
+          new: true,
+          upsert: true,
+          runValidators: true,
+        }
       );
-
-      if (goal) {
-        goal.goal_weight = goal_weight;
-        return goal;
-      }
-
-      goal = {
-        id: getNextGoalId(),
-        user_id: currentUserId,
-        goal_weight,
-      };
-
-      goals.push(goal);
-
-      return goal;
     },
 
-    // Adds a new calorie entry for the currently logged-in user, ensuring that the user is authenticated.
-    addCalorieEntry: (
+    addCalorieEntry: async (
       _,
       { date, calories },
       context
     ) => {
       const currentUserId = requireUser(context);
 
-      if (!date) {
-        throw new Error("Date is required.");
-      }
+      validateDate(date);
 
       if (calories < 0) {
-        throw new Error(
-          "Calories cannot be negative."
-        );
+        throw new Error("Calories cannot be negative.");
       }
 
-      const calorieEntry = {
-        id: getNextCalorieEntryId(),
+      return CalorieEntry.create({
         user_id: currentUserId,
         date,
         calories,
-      };
-
-      calorieEntries.push(calorieEntry);
-
-      return calorieEntry;
+      });
     },
   },
 };

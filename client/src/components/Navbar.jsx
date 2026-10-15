@@ -1,3 +1,5 @@
+import { useApolloClient } from "@apollo/client/react";
+
 import {
   AppBar,
   Box,
@@ -16,10 +18,12 @@ import Auth from "../utils/auth.js";
 // Displays navigation links for logged-in users.
 function Navbar() {
   const navigate = useNavigate();
+  const client = useApolloClient();
 
-  // Logs the user out and returns to the login page.
-  const buttonLogout = () => {
+  // Clears authentication and cached account data.
+  const buttonLogout = async () => {
     Auth.logout();
+    await client.clearStore();
     navigate("/login");
   };
 

@@ -17,6 +17,7 @@ import {
 
 import {
   useMutation,
+  useApolloClient,
 } from "@apollo/client/react";
 
 import {
@@ -28,6 +29,7 @@ import Auth from "../utils/auth.js";
 // Provides a form for users to create a new account and handles the account creation process.
 function CreateAccount() {
   const navigate = useNavigate();
+  const client = useApolloClient();
 
   // State variables for managing the form inputs and error messages.
   const [
@@ -68,6 +70,9 @@ function CreateAccount() {
                 editTextPassword,
             },
           });
+
+        // Clears previous account data before signing in.
+        await client.clearStore();
 
         Auth.login(
           data.createUser.token,
