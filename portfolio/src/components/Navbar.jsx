@@ -87,8 +87,8 @@ export default function Navbar() {
                 }}
               >
                 {link.label}
+              </Button>
             ))}
-            </Button>
               <Button
                 component="a"
                 href="https://cs-499-weight-tracker.onrender.com"
