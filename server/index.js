@@ -2,6 +2,7 @@ import "dotenv/config";
 
 import express from "express";
 import cors from "cors";
+import { fileURLToPath } from "node:url";
 
 import { ApolloServer } from "@apollo/server";
 import { expressMiddleware } from "@as-integrations/express5";
@@ -40,6 +41,20 @@ app.use(
     },
   })
 );
+
+// Serves the built React application.
+const clientDist = fileURLToPath(
+  new URL("../client/dist/", import.meta.url)
+);
+
+app.use(express.static(clientDist));
+
+// Allows React Router pages to load directly and on refresh.
+app.get("/{*splat}", (req, res) => {
+  res.sendFile("index.html", {
+    root: clientDist,
+  });
+});
 
 const PORT = process.env.PORT || 4000;
 
