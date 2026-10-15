@@ -9,7 +9,7 @@ import {
 } from '@mui/material';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 
-import Navbar from './components/navbar';
+import Navbar from './components/Navbar';
 
 const theme = createTheme({
   palette: {
