@@ -30,22 +30,45 @@ const paragraphs = [
   Protected routes control access to private pages, while protected server
   operations use the verified user identity to restrict access to account data.`,
 
+  `I improved the route guard to check for missing, malformed, and expired
+  tokens and to check the session again when a token expires. I also removed
+  the separate loggedIn flag from local storage. These browser checks guide
+  navigation, while the server verifies the token’s signature and expiration
+  before allowing protected operations. This distinction helped me understand
+  why a client login check cannot replace server authorization.`,
+
   `One challenge involved Apollo Client caching. After adding a weight entry,
   the server stored the data correctly, but the Weight Log did not immediately
   display the new value until the page was refreshed. I corrected the query
   behavior so the page retrieves current data from the server when it loads.
-  This helped me understand how frontend state, cached results, GraphQL
-  requests, and server operations interact.`,
+  I applied the same attention to data flow when adding saved calorie
+  calculations. CalorieLog loads the saved inputs and recommendation, and
+  the calculator updates that cached query after a successful save. A separate
+  card displays the saved recommendation while the form remains available
+  for editing. This keeps the saved result visible until new values are
+  successfully saved.`,
 
   `During the initial software engineering milestone, I created the calorie
   tracking interface and database file structure as foundations for later
-  enhancements. The final version now includes the calorie calculator described
-  in the algorithms section and the persistent MongoDB operations described in
-  the database section. Completing the work in stages allowed me to preserve
-  existing functionality while adding new responsibilities to the application.`,
+  enhancements. The application now includes the calorie calculator described
+  in the algorithms section and the persistent MongoDB operations described
+  in the database section. Saving the calculator inputs and result required
+  connecting the form, page display, GraphQL operations, and database model.
+  Completing the work in stages helped me understand how a feature can affect
+  several parts of an application.`,
 
-  `This enhancement supports my planned course outcomes through software
-  design, the use of appropriate development tools, and a security mindset.
+  `I deployed the full application through Render and connected it to MongoDB
+  Atlas. Express serves the built React application and supports direct
+  navigation to React Router pages. Environment variables provide the database
+  connection, JWT secret, and deployment configuration. Working through build
+  and startup issues gave me experience with the differences between running
+  the application locally and maintaining a hosted version. The GitHub Pages
+  ePortfolio provides access to the project documentation, source code, and
+  live application.`,
+
+  `This enhancement supports Course Outcomes Two, Four, and Five through
+  technical communication, software design, appropriate development tools,
+  and a security mindset.
   It demonstrates my ability to organize a full stack application, explain
   architectural decisions, and troubleshoot behavior across multiple
   application layers. The experience strengthened both my implementation

@@ -60,9 +60,12 @@ const paragraphs = [
   expected results, invalid inputs, age boundaries, and preservation of the
   original input object. Correcting an inaccurate test expectation reminded
   me that test data must be verified as carefully as implementation code.
-  I also evaluated practical tradeoffs. Running the calculation in the
-  client avoids an additional network request, while the fixed sedentary
-  activity assumption simplifies the feature but limits its flexibility.`,
+  I later reused the same function on the server to calculate the result
+  before saving it. The client uses the function to validate inputs, while
+  the server produces the stored recommendation. This gave me experience
+  extending a reusable algorithm across application layers without maintaining
+  separate formulas. The fixed sedentary activity assumption simplifies the
+  feature but limits its flexibility.`,
 
   `The software engineering enhancement demonstrates my ability to adapt
   an existing application to a different architecture. I rebuilt my Android
@@ -72,23 +75,45 @@ const paragraphs = [
   consistent interface design. One challenge involved a weight entry being
   saved without immediately appearing in the displayed list. Resolving that
   issue improved my understanding of how server data, Apollo Client caching,
-  and page navigation interact. This work reinforced the importance of
-  tracing a problem across application layers instead of assuming that a
-  successful database or API operation guarantees the correct user
-  experience.`,
+  and page navigation interact. I applied that understanding to the calorie
+  calculator by loading the saved calculation through the Calorie Log page
+  and updating its cached query after a successful save. The saved recommendation
+  is displayed separately from the editable form, so changing an input does
+  not remove the previously saved result. This work reinforced the importance
+  of tracing a problem through the interface, API, and database.`,
 
   `Database development and security became closely connected during the
   final enhancement. I replaced temporary arrays with persistent MongoDB
   operations and created Mongoose models for users, weight entries, goals,
-  and calorie entries. User references establish ownership, validation rules
-  constrain stored values, and unique indexes support account and goal
-  requirements. Password hashing and JWT verification protect authentication,
-  while database filters use the authenticated user’s identity to restrict
-  access to records. Clearing Apollo’s cached account data during
-  authentication changes also addressed the possibility of previously
-  loaded information appearing after switching accounts. These changes
-  helped me recognize that protecting data requires attention to storage,
-  server operations, and client behavior.`,
+  and calorie entries. I later added a CalorieCalculation model to store each
+  account’s latest age, sex, height, weight, and calculated calorie values.
+  User references establish ownership, validation rules constrain stored
+  values, and unique indexes limit each account to one goal and one saved
+  calculation. The application retrieves the saved calculation when the
+  user returns to the calorie page. This connected the algorithm enhancement
+  to persistent database operations.`,
+
+  `I also improved how the application handles authentication. The route
+  guard checks for missing, malformed, and expired tokens and schedules a
+  session check when a token expires. I removed the separate loggedIn value
+  from local storage so the interface uses the token’s expiration rather
+  than an independent login flag. Server operations still verify the JWT
+  signature and expiration before using its user identity to access records.
+  Password hashing and clearing Apollo’s account data during authentication
+  changes provide additional protection. This work helped me distinguish
+  between controlling navigation in the browser and enforcing authorization
+  on the server.`,
+
+  `Moving the application from local development to MongoDB Atlas and Render
+  expanded my experience with deployment. I configured the hosted database
+  connection, used environment variables for configuration and credentials,
+  and deployed the application with its React build served by Express.
+  Troubleshooting the startup process required checking build commands,
+  database connectivity, and the server’s listening port. I checked Atlas
+  to confirm that the deployed application could add and update records.
+  I also published the React ePortfolio through GitHub Pages and included
+  access to the live application. These steps helped me understand the work
+  required to make a project available outside my development environment.`,
 
   `My portfolio uses one original artifact to demonstrate growth across
   software design and engineering, algorithms and data structures, and
