@@ -6,6 +6,7 @@ import {
   Toolbar,
   Typography,
 } from '@mui/material';
+
 import { Link as RouterLink, NavLink } from 'react-router';
 
 const navigationLinks = [
@@ -89,19 +90,20 @@ export default function Navbar() {
                 {link.label}
               </Button>
             ))}
-              <Button
-                component="a"
-                href="https://cs-499-weight-tracker.onrender.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                variant="outlined"
-                color="inherit"
-                sx={{
-                  textTransform: 'none',
-                  fontWeight: 600,
-                }}
-              >
-                Live Deployment
+
+            <Button
+              component="a"
+              href="https://cs-499-weight-tracker.onrender.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              variant="outlined"
+              color="inherit"
+              sx={{
+                textTransform: 'none',
+                fontWeight: 600,
+              }}
+            >
+              Live Deployment
             </Button>
           </Box>
         </Toolbar>

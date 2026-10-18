@@ -5,7 +5,6 @@ import {
   Box,
   Button,
   Toolbar,
-  Typography,
 } from "@mui/material";
 
 import {
@@ -14,6 +13,7 @@ import {
 } from "react-router-dom";
 
 import Auth from "../utils/auth.js";
+import weightTrackerLogo from "../assets/weight-tracker-logo.svg";
 
 // Displays navigation links for logged-in users.
 function Navbar() {
@@ -27,25 +27,55 @@ function Navbar() {
     navigate("/login");
   };
 
-  // Displays the navigation bar with links to different pages based on the user's authentication status.
+  // Displays navigation based on the user's authentication status.
   return (
     <AppBar position="static">
-      <Toolbar>
-        <Typography
-          variant="h6"
+      <Toolbar
+        sx={{
+          flexDirection: { xs: "column", sm: "row" },
+          alignItems: { xs: "stretch", sm: "center" },
+          gap: { xs: 1, sm: 2 },
+          py: { xs: 1.5, sm: 0 },
+        }}
+      >
+        <Box
           sx={{
             flexGrow: 1,
-            fontWeight: "bold",
+            display: "flex",
+            justifyContent: { xs: "center", sm: "flex-start" },
+            minWidth: 0,
           }}
         >
-          Weight Tracker
-        </Typography>
+          <Box
+            component="img"
+            src={weightTrackerLogo}
+            alt="Weight Tracker"
+            width={192}
+            height={64}
+            sx={{
+              display: "block",
+              width: { xs: 180, sm: 168 },
+              maxWidth: "100%",
+              height: "auto",
+            }}
+          />
+        </Box>
 
         {Auth.loggedIn() && (
           <Box
+            component="nav"
+            aria-label="Main navigation"
             sx={{
               display: "flex",
-              gap: 1,
+              flexWrap: "wrap",
+              justifyContent: { xs: "center", sm: "flex-end" },
+              gap: { xs: 0.5, sm: 1 },
+              width: { xs: "100%", sm: "auto" },
+              "& .MuiButton-root": {
+                minWidth: 0,
+                flexShrink: 0,
+                px: 1,
+              },
             }}
           >
             <Button
