@@ -1,6 +1,5 @@
-import {
-  useState,
-} from "react";
+import { useState } from "react";
+import { useMutation, useQuery } from "@apollo/client/react";
 
 import {
   Alert,
@@ -19,185 +18,185 @@ import {
   Typography,
 } from "@mui/material";
 
-import {
-  useMutation,
-  useQuery,
-} from "@apollo/client/react";
-
-import {
-  ADD_CALORIE_ENTRY,
-} from "../utils/mutations.js";
+import { ADD_CALORIE_ENTRY } from "../utils/mutations.js";
 
 import {
   GET_CALORIE_ENTRIES_FOR_USER,
+  GET_CALORIE_CALCULATION,
 } from "../utils/queries.js";
 
 import CalorieCalculator from "../components/CalorieCalculator.jsx";
 
-// Provides a form for users to add calorie entries and displays a table of existing entries.
 function CalorieLog() {
-  const [
-    editTextDate,
-    setEditTextDate,
-  ] = useState("");
+  const [editTextDate, setEditTextDate] = useState("");
+  const [editTextCalories, setEditTextCalories] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
 
-  // State variable for managing the calories input field.
-  const [
-    editTextCalories,
-    setEditTextCalories,
-  ] = useState("");
-
-  // State variable for managing error messages related to form submission.
-  const [
-    errorMessage,
-    setErrorMessage,
-  ] = useState("");
-
-  // Fetches the user's calorie entries from the GraphQL API and manages loading and error states.
+  // Loads the saved inputs and recommendation when this page opens.
   const {
-    data,
-    loading,
-    error,
-  } = useQuery(
+    data: calculationData,
+    loading: calculationLoading,
+    error: calculationError,
+    refetch: refetchCalculation,
+  } = useQuery(GET_CALORIE_CALCULATION, {
+    fetchPolicy: "network-only",
+  });
+
+  const savedCalculation =
+    calculationData?.getCalorieCalculation;
+
+  // Loads the user's daily calorie entries.
+  const { data, loading, error } = useQuery(
     GET_CALORIE_ENTRIES_FOR_USER
   );
 
-  // GraphQL mutation for adding a new calorie entry.
-  const [
-    addCalorieEntry,
-  ] = useMutation(
-    ADD_CALORIE_ENTRY
-  );
+  const [addCalorieEntry] = useMutation(ADD_CALORIE_ENTRY);
 
-  // Handles the form submission for adding a new calorie entry, including validation and error handling.
-  const buttonSaveCalories =
-    async (event) => {
-      event.preventDefault();
+  const buttonSaveCalories = async (event) => {
+    event.preventDefault();
+    setErrorMessage("");
 
-      setErrorMessage("");
+    try {
+      const calories = Number(editTextCalories);
 
-      try {
-        const calories =
-          Number(
-            editTextCalories
-          );
-
-        if (
-          !editTextDate
-        ) {
-          throw new Error(
-            "Date is required."
-          );
-        }
-
-        if (
-          editTextCalories ===
-            "" ||
-          calories < 0
-        ) {
-          throw new Error(
-            "Calories cannot be negative."
-          );
-        }
-
-        // Performs the GraphQL mutation to add a new calorie entry and refetches the user's entries to update the table.
-        await addCalorieEntry({
-          variables: {
-            date:
-              editTextDate,
-
-            calories:
-              calories,
-          },
-
-          refetchQueries: [
-            GET_CALORIE_ENTRIES_FOR_USER,
-          ],
-        });
-
-        setEditTextDate(
-          ""
-        );
-
-        setEditTextCalories(
-          ""
-        );
-      } catch (error) {
-        setErrorMessage(
-          error.message
-        );
+      if (!editTextDate) {
+        throw new Error("Date is required.");
       }
-    };
 
-  // Renders the CalorieLog component, including the form for adding entries and the table displaying existing entries.
+      if (editTextCalories === "" || calories < 0) {
+        throw new Error("Calories cannot be negative.");
+      }
+
+      await addCalorieEntry({
+        variables: {
+          date: editTextDate,
+          calories,
+        },
+        refetchQueries: [GET_CALORIE_ENTRIES_FOR_USER],
+      });
+
+      setEditTextDate("");
+      setEditTextCalories("");
+    } catch (error) {
+      setErrorMessage(error.message);
+    }
+  };
+
   return (
-    <Container
-      maxWidth="lg"
-      sx={{
-        py: 4,
-      }}
-    >
+    <Container maxWidth="lg" sx={{ py: 4 }}>
       <Typography
         variant="h4"
         component="h1"
-        sx={{
-          mb: 3,
-          fontWeight: "bold",
-        }}
+        sx={{ mb: 3, fontWeight: "bold" }}
       >
         Calorie Log
       </Typography>
-      <CalorieCalculator />
 
-      <Card
-        sx={{
-          mb: 3,
-        }}
-      >
+      {calculationLoading ? (
+        <Typography sx={{ mb: 3 }}>
+          Loading saved calorie recommendation...
+        </Typography>
+      ) : calculationError ? (
+        <Alert
+          severity="error"
+          sx={{ mb: 3 }}
+          action={
+            <Button
+              color="inherit"
+              onClick={() => {
+                void refetchCalculation().catch(() => {});
+              }}
+            >
+              Retry
+            </Button>
+          }
+        >
+          Could not load your saved calculation.{" "}
+          {calculationError.message}
+        </Alert>
+      ) : (
+        <>
+          {savedCalculation && (
+            <Card sx={{ mb: 3 }}>
+              <CardContent>
+                <Box role="status" aria-live="polite">
+                  <Typography variant="h6" component="h2">
+                    Saved Maintenance Calories
+                  </Typography>
+
+                  <Typography
+                    variant="h4"
+                    component="p"
+                    sx={{ my: 1 }}
+                  >
+                    {savedCalculation.recommendedCalories
+                      .toLocaleString()}{" "}
+                    kcal/day
+                  </Typography>
+
+                  <Typography variant="body2">
+                    Saved inputs: Age {savedCalculation.age},{" "}
+                    {savedCalculation.gender},{" "}
+                    {savedCalculation.feet} ft{" "}
+                    {savedCalculation.inches} in,{" "}
+                    {savedCalculation.weight} lb.
+                  </Typography>
+
+                  <Typography variant="body2" sx={{ mt: 1 }}>
+                    Estimated resting needs:{" "}
+                    {savedCalculation.restingCalories
+                      .toLocaleString()}{" "}
+                    kcal/day
+                  </Typography>
+
+                  <Typography
+                    variant="body2"
+                    color="text.secondary"
+                    sx={{ mt: 1 }}
+                  >
+                    Uses a sedentary activity multiplier of{" "}
+                    {savedCalculation.activityMultiplier}.
+                    This saved recommendation remains until you
+                    calculate and save new values.
+                  </Typography>
+                </Box>
+              </CardContent>
+            </Card>
+          )}
+
+          <CalorieCalculator
+            savedCalculation={savedCalculation}
+          />
+        </>
+      )}
+
+      <Card sx={{ mb: 3 }}>
         <CardContent>
-          <Typography
-            variant="h6"
-            sx={{
-              mb: 2,
-            }}
-          >
+          <Typography variant="h6" sx={{ mb: 2 }}>
             Add Calorie Entry
           </Typography>
 
           <Box
             component="form"
-            onSubmit={
-              buttonSaveCalories
-            }
+            onSubmit={buttonSaveCalories}
             sx={{
               display: "grid",
               gridTemplateColumns: {
                 xs: "1fr",
-                sm:
-                  "1fr 1fr auto",
+                sm: "1fr 1fr auto",
               },
               gap: 2,
-              alignItems:
-                "center",
+              alignItems: "center",
             }}
           >
             <TextField
               id="editTextDate"
               type="date"
-              value={
-                editTextDate
+              value={editTextDate}
+              onChange={(event) =>
+                setEditTextDate(event.target.value)
               }
-              onChange={(
-                event
-              ) =>
-                setEditTextDate(
-                  event.target
-                    .value
-                )
-              }
-              InputLabelProps={{
-                shrink: true,
-              }}
+              InputLabelProps={{ shrink: true }}
               required
             />
 
@@ -205,21 +204,11 @@ function CalorieLog() {
               id="editTextCalories"
               label="Calories"
               type="number"
-              value={
-                editTextCalories
+              value={editTextCalories}
+              onChange={(event) =>
+                setEditTextCalories(event.target.value)
               }
-              onChange={(
-                event
-              ) =>
-                setEditTextCalories(
-                  event.target
-                    .value
-                )
-              }
-              inputProps={{
-                min: "0",
-                step: "1",
-              }}
+              inputProps={{ min: "0", step: "1" }}
               required
             />
 
@@ -227,103 +216,59 @@ function CalorieLog() {
               id="buttonSaveCalories"
               variant="contained"
               type="submit"
-              sx={{
-                height: {
-                  sm: 56,
-                },
-              }}
+              sx={{ height: { sm: 56 } }}
             >
               Save Calories
             </Button>
           </Box>
 
           {errorMessage && (
-            <Alert
-              severity="error"
-              sx={{
-                mt: 2,
-              }}
-            >
-              {
-                errorMessage
-              }
+            <Alert severity="error" sx={{ mt: 2 }}>
+              {errorMessage}
             </Alert>
           )}
         </CardContent>
       </Card>
 
       {error && (
-        <Alert
-          severity="error"
-          sx={{
-            mb: 2,
-          }}
-        >
+        <Alert severity="error" sx={{ mb: 2 }}>
           {error.message}
         </Alert>
       )}
 
-      <TableContainer
-        component={Card}
-      >
+      <TableContainer component={Card}>
         <Table>
           <TableHead>
             <TableRow>
-              <TableCell>
-                Date
-              </TableCell>
-
-              <TableCell>
-                Calories
-              </TableCell>
+              <TableCell>Date</TableCell>
+              <TableCell>Calories</TableCell>
             </TableRow>
           </TableHead>
 
           <TableBody>
             {loading ? (
               <TableRow>
-                <TableCell
-                  colSpan={2}
-                >
+                <TableCell colSpan={2}>
                   Loading...
                 </TableCell>
               </TableRow>
-            ) : data
-                ?.getCalorieEntriesForUser
-                ?.length > 0 ? (
-              data
-                .getCalorieEntriesForUser
-                .map(
-                  (
-                    calorieEntry
-                  ) => (
-                    <TableRow
-                      key={
-                        calorieEntry.id
-                      }
-                    >
-                      <TableCell>
-                        {
-                          calorieEntry.date
-                        }
-                      </TableCell>
-
-                      <TableCell>
-                        {
-                          calorieEntry.calories
-                        }
-                      </TableCell>
-                    </TableRow>
-                  )
+            ) : data?.getCalorieEntriesForUser?.length > 0 ? (
+              data.getCalorieEntriesForUser.map(
+                (calorieEntry) => (
+                  <TableRow key={calorieEntry.id}>
+                    <TableCell>
+                      {calorieEntry.date}
+                    </TableCell>
+                    <TableCell>
+                      {calorieEntry.calories}
+                    </TableCell>
+                  </TableRow>
                 )
+              )
             ) : (
               <TableRow>
-                <TableCell
-                  colSpan={2}
-                  align="center"
-                >
-                  No calorie
-                  entries yet.
+                <TableCell colSpan={2} align="center">
+                  No calorie entries yet.
                 </TableCell>
               </TableRow>
             )}

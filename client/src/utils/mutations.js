@@ -1,6 +1,36 @@
 import { gql } from "@apollo/client";
 
-// GraphQL mutations for user authentication, weight management, and goal weight management.
+// Calculates and saves the latest result for the authenticated user.
+export const SAVE_CALORIE_CALCULATION = gql`
+  mutation SaveCalorieCalculation(
+    $age: Int!
+    $gender: String!
+    $feet: Int!
+    $inches: Float!
+    $weight: Float!
+  ) {
+    saveCalorieCalculation(
+      age: $age
+      gender: $gender
+      feet: $feet
+      inches: $inches
+      weight: $weight
+    ) {
+      id
+      user_id
+      age
+      gender
+      feet
+      inches
+      weight
+      restingCalories
+      recommendedCalories
+      activityMultiplier
+    }
+  }
+`;
+
+// Creates a user account.
 export const CREATE_USER = gql`
   mutation CreateUser(
     $username: String!
@@ -17,7 +47,7 @@ export const CREATE_USER = gql`
   }
 `;
 
-// GraphQL mutation for logging in a user.
+// Logs in a user.
 export const LOGIN_USER = gql`
   mutation LoginUser(
     $username: String!
@@ -34,7 +64,7 @@ export const LOGIN_USER = gql`
   }
 `;
 
-// GraphQL mutation for adding a weight entry.
+// Adds a weight entry.
 export const ADD_WEIGHT = gql`
   mutation AddWeight(
     $date: String!
@@ -52,7 +82,7 @@ export const ADD_WEIGHT = gql`
   }
 `;
 
-// GraphQL mutation for updating a weight entry.
+// Updates a weight entry.
 export const UPDATE_WEIGHT = gql`
   mutation UpdateWeight(
     $id: ID!
@@ -72,14 +102,14 @@ export const UPDATE_WEIGHT = gql`
   }
 `;
 
-// GraphQL mutation for deleting a weight entry.
+// Deletes a weight entry.
 export const DELETE_WEIGHT = gql`
   mutation DeleteWeight($id: ID!) {
     deleteWeight(id: $id)
   }
 `;
 
-// GraphQL mutation for saving the user's goal weight.
+// Saves the user's goal weight.
 export const SAVE_GOAL_WEIGHT = gql`
   mutation SaveGoalWeight(
     $goal_weight: Float!
@@ -94,7 +124,7 @@ export const SAVE_GOAL_WEIGHT = gql`
   }
 `;
 
-// GraphQL mutation for adding a calorie entry.
+// Adds a calorie entry.
 export const ADD_CALORIE_ENTRY = gql`
   mutation AddCalorieEntry(
     $date: String!

@@ -1,11 +1,11 @@
-// GraphQL type definitions for the Weight Tracker application, defining the schema for users, weights, goals, and calorie entries.
+// GraphQL type definitions for users, weights, goals, calorie entries,
+// and saved calorie calculations.
 const typeDefs = `#graphql
-
   type User {
     id: ID!
     username: String!
   }
-  
+
   type Weight {
     id: ID!
     user_id: ID!
@@ -32,14 +32,36 @@ const typeDefs = `#graphql
     loggedIn: Boolean!
   }
 
+  type CalorieCalculation {
+    id: ID!
+    user_id: ID!
+    age: Int!
+    gender: String!
+    feet: Int!
+    inches: Float!
+    weight: Float!
+    restingCalories: Float!
+    recommendedCalories: Float!
+    activityMultiplier: Float!
+  }
+
   type Query {
     health: String!
     getWeightsForUser: [Weight!]!
     getGoalWeight: Goal
     getCalorieEntriesForUser: [CalorieEntry!]!
+    getCalorieCalculation: CalorieCalculation
   }
 
   type Mutation {
+    saveCalorieCalculation(
+      age: Int!
+      gender: String!
+      feet: Int!
+      inches: Float!
+      weight: Float!
+    ): CalorieCalculation!
+
     createUser(
       username: String!
       password: String!
@@ -74,8 +96,6 @@ const typeDefs = `#graphql
       calories: Int!
     ): CalorieEntry!
   }
-
-  
 `;
 
 export default typeDefs;
