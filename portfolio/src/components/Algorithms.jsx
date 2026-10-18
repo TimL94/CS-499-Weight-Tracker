@@ -3,8 +3,9 @@ import { Box, Button, Paper, Typography } from '@mui/material';
 const repositoryUrl = 'https://github.com/TimL94/CS-499-Weight-Tracker';
 
 const paragraphs = [
-  `For this enhancement, I expanded the Weight Tracker application by adding
-  a calorie calculator to its calorie log. I selected this feature because it
+  `For this enhancement, I expanded the Weight Tracker application I originally
+  created in CS 360 by adding a calorie calculator to the web application’s
+  calorie log. I selected this feature because it
   connects algorithmic problem solving with my focus on full stack development.
   It gave me an opportunity to implement a calculation, organize its inputs and
   outputs, evaluate design tradeoffs, and verify the results through unit
@@ -22,13 +23,28 @@ const paragraphs = [
   This structure makes the function easier to read and gives the interface
   named results to display. The calculation performs a fixed number of
   operations and uses a fixed amount of additional storage, giving it O(1)
-  time and O(1) auxiliary space complexity.`,
+  time and O(1) auxiliary space complexity. These measurements describe the
+  calculation function itself; network requests and database operations are
+  separate from that analysis.`,
 
   `I separated the calculation function from the React component so I could
-  test the mathematical logic independently of the interface. Since the
-  calculation only needs the values entered into the form, I implemented it
-  in the client. This avoids an additional network request for each calculation
-  and keeps the reusable logic separate from the form and display code.`,
+  test the mathematical logic independently of the interface. The first
+  version ran the calculation in the client. I later reused the same function
+  in the server’s saveCalorieCalculation resolver. The client runs it to
+  validate the inputs before submitting them, and the server calculates the
+  result before writing it to MongoDB. The mutation accepts the measurements
+  rather than a calorie total supplied by the browser. Reusing one function
+  keeps the formula and validation consistent across both parts of the
+  application.`,
+
+  `I also connected the algorithm to persistent storage. Each account can
+  save its latest age, sex, height in feet and inches, weight, estimated
+  resting calories, maintenance calorie recommendation, and activity
+  multiplier. The calorie page retrieves this record and uses it to populate
+  the form and display the saved recommendation. A successful save updates
+  the displayed record, while editing the form leaves the previous saved
+  recommendation visible. This extends the usefulness of the algorithm
+  without changing its mathematical formula.`,
 
   `One challenge was making the input process convenient while keeping the
   calculation consistent. I changed the height input to separate feet and
