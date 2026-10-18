@@ -1,0 +1,76 @@
+<svg
+  xmlns="http://www.w3.org/2000/svg"
+  viewBox="0 0 192 64"
+  width="192"
+  height="64"
+  role="img"
+  aria-labelledby="logo-title"
+>
+  <title id="logo-title">Weight Tracker</title>
+
+  <rect
+    x="3"
+    y="3"
+    width="58"
+    height="58"
+    rx="14"
+    fill="#ffffff"
+  />
+
+  <rect
+    x="13"
+    y="13"
+    width="38"
+    height="38"
+    rx="9"
+    fill="#e3f2fd"
+    stroke="#1976d2"
+    stroke-width="2.5"
+  />
+
+  <path
+    d="M21 29a11 11 0 0 1 22 0"
+    fill="none"
+    stroke="#1976d2"
+    stroke-width="2.5"
+    stroke-linecap="round"
+  />
+
+  <path
+    d="M32 29l5-9"
+    stroke="#00897b"
+    stroke-width="3"
+    stroke-linecap="round"
+  />
+
+  <circle
+    cx="32"
+    cy="29"
+    r="2.5"
+    fill="#1976d2"
+  />
+
+  <path
+    d="M22 39v5m20-5v5"
+    stroke="#90caf9"
+    stroke-width="5"
+    stroke-linecap="round"
+  />
+
+  <g fill="#ffffff" font-family="Arial, Helvetica, sans-serif">
+    <text
+      x="75"
+      y="30"
+      font-size="25"
+      font-weight="700"
+    >WEIGHT</text>
+
+    <text
+      x="76"
+      y="50"
+      font-size="13"
+      font-weight="600"
+      letter-spacing="4"
+    >TRACKER</text>
+  </g>
+</svg>

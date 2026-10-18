@@ -1,97 +1,108 @@
+import { useApolloClient } from "@apollo/client/react";
+
 import {
   AppBar,
   Box,
   Button,
-  Container,
   Toolbar,
   Typography,
-} from '@mui/material';
-import { Link as RouterLink, NavLink } from 'react-router';
+} from "@mui/material";
 
-const navigationLinks = [
-  { label: 'Self-Assessment', to: '/' },
-  { label: 'Original Artifact', to: '/original-artifact' },
-  { label: 'Software Design', to: '/software-design' },
-  { label: 'Algorithms', to: '/algorithms' },
-  { label: 'Databases', to: '/databases' },
-];
+import {
+  Link,
+  useNavigate,
+} from "react-router-dom";
 
-export default function Navbar() {
+import Auth from "../utils/auth.js";
+
+// Displays navigation links for logged-in users.
+function Navbar() {
+  const navigate = useNavigate();
+  const client = useApolloClient();
+
+  // Clears authentication and cached account data.
+  const buttonLogout = async () => {
+    Auth.logout();
+    await client.clearStore();
+    navigate("/login");
+  };
+
+  // Displays navigation based on the user's authentication status.
   return (
-    <AppBar
-      position="sticky"
-      elevation={0}
-      sx={{
-        bgcolor: '#152b43',
-        position: { xs: 'static', md: 'sticky' },
-      }}
-    >
-      <Container maxWidth="lg">
-        <Toolbar
-          disableGutters
+    <AppBar position="static">
+      <Toolbar
+        sx={{
+          flexDirection: { xs: "column", sm: "row" },
+          alignItems: { xs: "stretch", sm: "center" },
+          gap: { xs: 1, sm: 2 },
+          py: { xs: 1.5, sm: 0 },
+        }}
+      >
+        <Typography
+          variant="h6"
           sx={{
-            py: 2,
-            gap: 2,
-            flexDirection: { xs: 'column', md: 'row' },
-            alignItems: { xs: 'flex-start', md: 'center' },
-            justifyContent: 'space-between',
+            flexGrow: 1,
+            fontWeight: "bold",
+            whiteSpace: "nowrap",
+            textAlign: { xs: "center", sm: "left" },
           }}
         >
-          <Typography
-            variant="h6"
-            component={RouterLink}
-            to="/"
+          Weight Tracker
+        </Typography>
+
+        {Auth.loggedIn() && (
+          <Box
+            component="nav"
+            aria-label="Main navigation"
             sx={{
-              color: 'inherit',
-              fontWeight: 700,
-              textDecoration: 'none',
-              flexShrink: 0,
-              '&:focus-visible': {
-                outline: '2px solid white',
-                outlineOffset: 4,
+              display: "flex",
+              flexWrap: "wrap",
+              justifyContent: { xs: "center", sm: "flex-end" },
+              gap: { xs: 0.5, sm: 1 },
+              width: { xs: "100%", sm: "auto" },
+              "& .MuiButton-root": {
+                minWidth: 0,
+                flexShrink: 0,
+                px: 1,
               },
             }}
           >
-            Timothy Lee
-          </Typography>
+            <Button
+              color="inherit"
+              component={Link}
+              to="/weight-log"
+            >
+              Weight
+            </Button>
 
-          <Box
-            component="nav"
-            aria-label="Portfolio navigation"
-            sx={{
-              display: 'flex',
-              flexWrap: 'wrap',
-              gap: 0.5,
-            }}
-          >
-            {navigationLinks.map((link) => (
-              <Button
-                key={link.to}
-                component={NavLink}
-                to={link.to}
-                end
-                color="inherit"
-                sx={{
-                  textTransform: 'none',
-                  fontWeight: 600,
-                  '&.active': {
-                    bgcolor: 'rgba(255, 255, 255, 0.2)',
-                  },
-                  '&:hover': {
-                    bgcolor: 'rgba(255, 255, 255, 0.12)',
-                  },
-                  '&:focus-visible': {
-                    outline: '2px solid white',
-                    outlineOffset: 2,
-                  },
-                }}
-              >
-                {link.label}
-              </Button>
-            ))}
+            <Button
+              color="inherit"
+              component={Link}
+              to="/goal"
+            >
+              Goal
+            </Button>
+
+            <Button
+              color="inherit"
+              component={Link}
+              to="/calories"
+            >
+              Calories
+            </Button>
+
+            <Button
+              id="buttonLogout"
+              color="inherit"
+              onClick={buttonLogout}
+            >
+              Logout
+            </Button>
           </Box>
-        </Toolbar>
-      </Container>
+        )}
+      </Toolbar>
     </AppBar>
   );
 }
+
+export default Navbar;
