@@ -1,50 +1,67 @@
-// Utility functions for handling authentication, including login, logout, and token management.
+// Handles login, logout, and token management.
 const Auth = {
-
-  // Logs in the user by storing the authentication token and user ID in local storage.
+  // Stores the authentication token and user ID.
   login(token, currentUserId) {
     localStorage.setItem("id_token", token);
-    localStorage.setItem(
-      "currentUserId",
-      currentUserId
-    );
-    localStorage.setItem(
-      "loggedIn",
-      "true"
-    );
+    localStorage.setItem("currentUserId", currentUserId);
+    localStorage.removeItem("loggedIn");
   },
 
-  // Logs out the user by removing the authentication token and user ID from local storage.
+  // Removes authentication information.
   logout() {
     localStorage.removeItem("id_token");
-    localStorage.removeItem(
-      "currentUserId"
-    );
-    localStorage.setItem(
-      "loggedIn",
-      "false"
-    );
+    localStorage.removeItem("currentUserId");
+    localStorage.removeItem("loggedIn");
   },
 
-  // Retrieves the authentication token from local storage.
+  // Retrieves the authentication token.
   getToken() {
-    return localStorage.getItem(
-      "id_token"
-    );
+    return localStorage.getItem("id_token");
   },
 
-  // Retrieves the current user's ID from local storage.
+  // Retrieves the current user's ID.
   getCurrentUserId() {
-    return localStorage.getItem(
-      "currentUserId"
+    return localStorage.getItem("currentUserId");
+  },
+
+  // Decodes token claims for UI checks.
+  // The server remains responsible for verifying the signature.
+  getTokenPayload(token = this.getToken()) {
+    try {
+      const parts = token.split(".");
+
+      if (
+        parts.length !== 3 ||
+        parts.some((part) => !/^[A-Za-z0-9_-]+$/.test(part))
+      ) {
+        return null;
+      }
+
+      const payload = parts[1]
+        .replace(/-/g, "+")
+        .replace(/_/g, "/");
+
+      return JSON.parse(atob(payload));
+    } catch {
+      return null;
+    }
+  },
+
+  // Treats missing, malformed, and expired tokens as signed out.
+  isTokenExpired(token) {
+    const payload = this.getTokenPayload(token);
+
+    return (
+      !Number.isFinite(payload?.exp) ||
+      payload.exp <= Date.now() / 1000
     );
   },
 
-  // Checks if the user is logged in by verifying the presence of an authentication token in local storage.
+  // Checks token expiration before displaying authenticated pages.
   loggedIn() {
-    return Boolean(
-      localStorage.getItem("id_token")
-    );
+    const token = this.getToken();
+
+    return Boolean(token) && !this.isTokenExpired(token);
   },
 };
 
