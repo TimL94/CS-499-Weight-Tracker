@@ -5,7 +5,9 @@ import User from "../models/User.js";
 import WeightEntry from "../models/WeightEntry.js";
 import Goal from "../models/Goal.js";
 import CalorieEntry from "../models/CalorieEntry.js";
+import CalorieCalculation from "../models/CalorieCalculation.js";
 
+import { calculateCalories } from "../../client/src/utils/calorieCalculator.js";
 import { signToken } from "../utils/auth.js";
 
 // Requires an authenticated user with a MongoDB ID.
@@ -42,6 +44,15 @@ const validateDate = (date) => {
 
 const resolvers = {
   Query: {
+    // Retrieves the authenticated user's saved calculation.
+    getCalorieCalculation: async (_, args, context) => {
+      const currentUserId = requireUser(context);
+
+      return CalorieCalculation.findOne({
+        user_id: currentUserId,
+      });
+    },
+
     health: () => {
       return "Weight Tracker API is running";
     },
@@ -72,6 +83,61 @@ const resolvers = {
   },
 
   Mutation: {
+    // Calculates on the server and saves one result per authenticated account.
+    saveCalorieCalculation: async (
+      _,
+      { age, gender, feet, inches, weight },
+      context
+    ) => {
+      const currentUserId = requireUser(context);
+
+      if (!Number.isInteger(feet) || feet < 0) {
+        throw new Error(
+          "Feet must be a whole number of zero or greater."
+        );
+      }
+
+      if (
+        !Number.isFinite(inches) ||
+        inches < 0 ||
+        inches >= 12
+      ) {
+        throw new Error(
+          "Inches must be zero or greater and less than 12."
+        );
+      }
+
+      const calculation = calculateCalories({
+        age,
+        gender,
+        height: feet * 12 + inches,
+        weight,
+      });
+
+      await CalorieCalculation.init();
+
+      return CalorieCalculation.findOneAndUpdate(
+        {
+          user_id: currentUserId,
+        },
+        {
+          $set: {
+            age,
+            gender,
+            feet,
+            inches,
+            weight,
+            ...calculation,
+          },
+        },
+        {
+          new: true,
+          upsert: true,
+          runValidators: true,
+        }
+      );
+    },
+
     // Hashes passwords before saving user accounts.
     createUser: async (_, { username, password }) => {
       const trimmedUsername = username.trim().toLowerCase();
@@ -186,7 +252,10 @@ const resolvers = {
           user_id: currentUserId,
         },
         {
-          $set: { date, weight },
+          $set: {
+            date,
+            weight,
+          },
         },
         {
           new: true,
@@ -241,7 +310,9 @@ const resolvers = {
           user_id: currentUserId,
         },
         {
-          $set: { goal_weight },
+          $set: {
+            goal_weight,
+          },
         },
         {
           new: true,

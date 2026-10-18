@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useMutation } from "@apollo/client/react";
 
 import {
   Alert,
@@ -11,42 +12,59 @@ import {
   Typography,
 } from "@mui/material";
 
-import {
-  calculateCalories,
-} from "../utils/calorieCalculator.js";
+import { GET_CALORIE_CALCULATION } from "../utils/queries.js";
+import { SAVE_CALORIE_CALCULATION } from "../utils/mutations.js";
+import { calculateCalories } from "../utils/calorieCalculator.js";
 
-// Provides a form for users to calculate their estimated maintenance calories based on age, gender, height, and weight.
-function CalorieCalculator() {
-  const [editTextAge, setEditTextAge] =
-    useState("");
+function CalorieCalculator({ savedCalculation }) {
+  const [editTextAge, setEditTextAge] = useState(
+    String(savedCalculation?.age ?? "")
+  );
 
-  const [gender, setGender] =
-    useState("");
+  const [gender, setGender] = useState(
+    savedCalculation?.gender ?? ""
+  );
 
-  const [editTextFeet, setEditTextFeet] =
-    useState("");
+  const [editTextFeet, setEditTextFeet] = useState(
+    String(savedCalculation?.feet ?? "")
+  );
 
-  const [editTextInches, setEditTextInches] =
-    useState("");
+  const [editTextInches, setEditTextInches] = useState(
+    String(savedCalculation?.inches ?? "")
+  );
 
-  const [editTextWeight, setEditTextWeight] =
-    useState("");
+  const [editTextWeight, setEditTextWeight] = useState(
+    String(savedCalculation?.weight ?? "")
+  );
 
-  const [calorieCalculation, setCalorieCalculation] =
-    useState(null);
+  const [errorMessage, setErrorMessage] = useState("");
+  const [saved, setSaved] = useState(false);
 
-  const [errorMessage, setErrorMessage] =
-    useState("");
+  const [saveCalorieCalculation, { loading: saving }] =
+    useMutation(SAVE_CALORIE_CALCULATION, {
+      // Updates the saved recommendation displayed by CalorieLog.
+      update(cache, { data }) {
+        if (data?.saveCalorieCalculation) {
+          cache.writeQuery({
+            query: GET_CALORIE_CALCULATION,
+            data: {
+              getCalorieCalculation:
+                data.saveCalorieCalculation,
+            },
+          });
+        }
+      },
+    });
 
-  const clearCalculation = () => {
-    setCalorieCalculation(null);
+  // Clears form messages while keeping the saved recommendation.
+  const clearFeedback = () => {
     setErrorMessage("");
+    setSaved(false);
   };
 
-  // Handle the form submission to calculate calories based on user input.
-  const buttonCalculateCalories = (event) => {
+  const buttonCalculateCalories = async (event) => {
     event.preventDefault();
-    clearCalculation();
+    clearFeedback();
 
     try {
       if (
@@ -56,18 +74,13 @@ function CalorieCalculator() {
         editTextInches.trim() === "" ||
         editTextWeight.trim() === ""
       ) {
-        throw new Error(
-          "Complete all calculator fields."
-        );
+        throw new Error("Complete all calculator fields.");
       }
 
       const feet = Number(editTextFeet);
       const inches = Number(editTextInches);
 
-      if (
-        !Number.isInteger(feet) ||
-        feet < 0
-      ) {
+      if (!Number.isInteger(feet) || feet < 0) {
         throw new Error(
           "Feet must be a whole number of zero or greater."
         );
@@ -83,22 +96,39 @@ function CalorieCalculator() {
         );
       }
 
-      const height = feet * 12 + inches;
-
-      const result = calculateCalories({
+      // Validates the inputs using the existing formula.
+      calculateCalories({
         age: Number(editTextAge),
         gender,
-        height,
+        height: feet * 12 + inches,
         weight: Number(editTextWeight),
       });
 
-      setCalorieCalculation(result);
+      // The server calculates and saves the inputs and recommendation.
+      const { data } = await saveCalorieCalculation({
+        variables: {
+          age: Number(editTextAge),
+          gender,
+          feet,
+          inches,
+          weight: Number(editTextWeight),
+        },
+      });
+
+      if (!data?.saveCalorieCalculation) {
+        throw new Error(
+          "The server did not return a saved calculation."
+        );
+      }
+
+      setSaved(true);
     } catch (error) {
-      setErrorMessage(error.message);
+      setErrorMessage(
+        `Calculation was not saved. ${error.message}`
+      );
     }
   };
 
-  // Renders the calorie calculator form and displays the results or any error messages.
   return (
     <Card sx={{ mb: 3 }}>
       <CardContent>
@@ -117,7 +147,8 @@ function CalorieCalculator() {
         >
           Estimate maintenance calories using a sedentary
           activity assumption. Enter height in feet and inches
-          and weight in pounds.
+          and weight in pounds. Your latest saved inputs and
+          result will load automatically when you return.
         </Typography>
 
         <Box
@@ -137,12 +168,13 @@ function CalorieCalculator() {
           >
             <TextField
               id="editTextAge"
+              disabled={saving}
               label="Age"
               type="number"
               value={editTextAge}
               onChange={(event) => {
                 setEditTextAge(event.target.value);
-                clearCalculation();
+                clearFeedback();
               }}
               slotProps={{
                 htmlInput: {
@@ -158,24 +190,20 @@ function CalorieCalculator() {
 
             <TextField
               id="gender"
+              disabled={saving}
               label="Select Sex"
               select
               value={gender}
               onChange={(event) => {
                 setGender(event.target.value);
-                clearCalculation();
+                clearFeedback();
               }}
               helperText="Sex is used to determine the equation adjustment"
               fullWidth
               required
             >
-              <MenuItem value="male">
-                Male
-              </MenuItem>
-
-              <MenuItem value="female">
-                Female
-              </MenuItem>
+              <MenuItem value="male">Male</MenuItem>
+              <MenuItem value="female">Female</MenuItem>
             </TextField>
 
             <Box
@@ -187,12 +215,13 @@ function CalorieCalculator() {
             >
               <TextField
                 id="editTextFeet"
+                disabled={saving}
                 label="Height (feet)"
                 type="number"
                 value={editTextFeet}
                 onChange={(event) => {
                   setEditTextFeet(event.target.value);
-                  clearCalculation();
+                  clearFeedback();
                 }}
                 slotProps={{
                   htmlInput: {
@@ -207,12 +236,13 @@ function CalorieCalculator() {
 
               <TextField
                 id="editTextInches"
+                disabled={saving}
                 label="Height (inches)"
                 type="number"
                 value={editTextInches}
                 onChange={(event) => {
                   setEditTextInches(event.target.value);
-                  clearCalculation();
+                  clearFeedback();
                 }}
                 slotProps={{
                   htmlInput: {
@@ -228,12 +258,13 @@ function CalorieCalculator() {
 
             <TextField
               id="calculatorEditTextWeight"
+              disabled={saving}
               label="Weight (pounds)"
               type="number"
               value={editTextWeight}
               onChange={(event) => {
                 setEditTextWeight(event.target.value);
-                clearCalculation();
+                clearFeedback();
               }}
               slotProps={{
                 htmlInput: {
@@ -249,70 +280,27 @@ function CalorieCalculator() {
 
           <Button
             id="buttonCalculateCalories"
+            disabled={saving}
             variant="contained"
             type="submit"
             sx={{ mt: 2 }}
           >
-            Calculate Calories
+            {saving
+              ? "Saving..."
+              : "Calculate and Save Calories"}
           </Button>
         </Box>
 
-        {errorMessage && (
-          <Alert
-            severity="error"
-            sx={{ mt: 2 }}
-          >
-            {errorMessage}
+        {saved && (
+          <Alert severity="success" sx={{ mt: 2 }}>
+            Calculation saved to your account.
           </Alert>
         )}
 
-        {calorieCalculation && (
-          <Box
-            role="status"
-            aria-live="polite"
-            sx={{
-              mt: 3,
-              p: 2,
-              border: 1,
-              borderColor: "divider",
-              borderRadius: 2,
-            }}
-          >
-            <Typography
-              variant="subtitle1"
-              component="h3"
-            >
-              Estimated Maintenance Calories
-            </Typography>
-
-            <Typography
-              variant="h4"
-              component="p"
-              sx={{ my: 1 }}
-            >
-              {calorieCalculation.recommendedCalories
-                .toLocaleString()}{" "}
-              kcal/day
-            </Typography>
-
-            <Typography variant="body2">
-              Estimated resting needs:{" "}
-              {calorieCalculation.restingCalories
-                .toLocaleString()}{" "}
-              kcal/day
-            </Typography>
-
-            <Typography
-              variant="body2"
-              color="text.secondary"
-              sx={{ mt: 1 }}
-            >
-              Uses a sedentary activity multiplier of{" "}
-              {calorieCalculation.activityMultiplier}.
-              Actual needs vary with activity and individual
-              circumstances. This estimate is not a substitute for professional medical advice.
-            </Typography>
-          </Box>
+        {errorMessage && (
+          <Alert severity="error" sx={{ mt: 2 }}>
+            {errorMessage}
+          </Alert>
         )}
       </CardContent>
     </Card>

@@ -1,18 +1,14 @@
-
-// Calorie calculator utility variables for the Weight Tracker application.
+// Conversion constants used by the calorie calculator.
 const POUNDS_TO_KILOGRAMS = 0.45359237;
 const INCHES_TO_CENTIMETERS = 2.54;
 const ACTIVITY_MULTIPLIER = 1.2;
 
-// Calorie calculator utility function for the Weight Tracker application, 
-// using the Mifflin-St Jeor equation to estimate resting and recommended daily calorie intake based on user inputs.
 const GENDER_ADJUSTMENTS = Object.freeze({
   male: 5,
   female: -161,
 });
 
-// Calculates the resting and recommended daily calorie intake based on the Mifflin-St Jeor equation, given the user's age, gender, height, and weight. 
-// Throws errors for invalid inputs.
+// Calculates estimated resting and maintenance calories.
 export const calculateCalories = ({
   age,
   gender,
@@ -62,15 +58,14 @@ export const calculateCalories = ({
   const heightCentimeters =
     height * INCHES_TO_CENTIMETERS;
 
-  // Mifflin-St Jeor equation:
-  // https://pubmed.ncbi.nlm.nih.gov/2305711/
+  // Mifflin-St Jeor equation.
   const restingCalories =
     10 * weightKilograms +
     6.25 * heightCentimeters -
     5 * age +
     GENDER_ADJUSTMENTS[gender];
 
-  // Fixed sedentary assumption, without a weight-loss deficit.
+  // Uses the existing sedentary activity assumption.
   const recommendedCalories =
     restingCalories * ACTIVITY_MULTIPLIER;
 
